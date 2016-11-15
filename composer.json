@@ -1,0 +1,9 @@
+{
+  "require": {
+    "fhteam/selectel-storage-api": "dev-master",
+    "aws/aws-sdk-php": "dev-master"
+  },
+  "autoload": {
+    "psr-0": {"": "src/"}
+  }
+}
