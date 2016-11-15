@@ -10,10 +10,10 @@ namespace TJ\Uploader;
 
 use Aws\S3\Exception\S3Exception;
 use Aws\S3\S3Client;
-use TJ\Exception\UploadException;
-use TJ\File\AmazonFile;
+use TJ\File\File;
+use TJ\File\FileInterface;
 
-class AmazonUploader
+class AmazonUploader implements AbstractUploaderInterface
 {
     const AMAZON_TYPE = 1;
 
@@ -51,40 +51,24 @@ class AmazonUploader
         ]);
     }
 
-    public function setUploadedFile($file)
-    {
-        if(!is_array($file) || !isset($file['name'])) {
-            throw new \Exception('Bad filedata');
-        }
-
-        if ($file['error'] != 0) {
-            throw new UploadException($file['error']);
-        }
-
-        $this->filename = $file['name'];
-        $this->fileLocalPath = $file['tmp_name'];
-    }
-
     /**
-     * @param $url
-     * @throws \Exception
+     * @param string $path
      */
-    public function setFileFromUrl($url)
+    public function setFileLocalPath($path)
     {
-        $name = array_pop(explode(DIRECTORY_SEPARATOR, $url));
-
-        try {
-            file_put_contents($this->parameters['tmp_dir'] . '/' . $name, file_get_contents($url));
-        } catch (\Exception $e) {
-            throw $e;
-        }
-
-        $this->filename = $name;
-        $this->fileLocalPath = $this->parameters['tmp_dir'] . '/' . $name;
+        $this->fileLocalPath = $path;
     }
 
     /**
-     * @return AmazonFile
+     * @param string $name
+     */
+    public function setFilename($name)
+    {
+        $this->filename = $name;
+    }
+
+    /**
+     * @return FileInterface
      */
     public function uploadFile()
     {
@@ -96,13 +80,16 @@ class AmazonUploader
                 'ACL'    => 'public-read',
             ]);
 
-            $uploadedFile = new AmazonFile();
-            $uploadedFile->setFileUri($this->parameters['s3_container_url'] . '/' . $this->filename);
+            $uploadedFile = new File();
+            $uploadedFile->setUrl($this->parameters['s3_container_url'] . '/' . $this->filename);
+            $uploadedFile->setSize(filesize($this->fileLocalPath));
 
             return $uploadedFile;
 
         } catch (S3Exception $e) {
             echo $e->getMessage();
         }
+
+        return null;
     }
 }

@@ -11,15 +11,21 @@ namespace TJ\File;
 
 interface FileInterface
 {
-    public function __construct();
+    /**
+     * Данные о загруженной картинке
+     * @return array
+     */
+    public function getData();
 
     /**
+     * Ссылка на картинку
      * @return string
      */
-    public function getFileUri();
+    public function getUrl();
 
     /**
-     * @param $url
+     * Размер картинки (в байтах, если можно узнать)
+     * @return integer|null
      */
-    public function setFileUri($url);
+    public function getSize();
 }
